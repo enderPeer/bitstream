@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="dark light">
+<title>bitstream</title>
+<style>
+:root{--bg:#0b0b0c;--fg:#e8e6e1;--mute:#8a8780;--acc:#f2c14e}
+@media (prefers-color-scheme:light){:root{--bg:#faf9f6;--fg:#161616;--mute:#6b6964;--acc:#b07a00}}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center}
+h1{font-size:22px;font-weight:650;letter-spacing:-.02em;margin:0 0 6px}h1 b{color:var(--acc);font-weight:650}
+p{color:var(--mute);margin:0}
+i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc);margin-right:8px;animation:k 1s infinite alternate}
+@keyframes k{to{opacity:.2}}
+</style>
+</head>
+<body>
+<div><h1>bit<b>stream</b></h1><p id="s"><i></i>finding the server…</p></div>
+<script>
+/* stable entry: read the current tunnel URL, check it answers, then go there */
+const R="enderPeer/bitstream",s=document.getElementById("s");
+async function cur(){
+  const t=Date.now();
+  for(const u of[`https://api.github.com/repos/${R}/contents/url.json?ref=main&t=${t}`,`url.json?t=${t}`]){
+    try{const r=await fetch(u,{cache:"no-store",headers:u.includes("api.")?{Accept:"application/vnd.github.raw+json"}:{}});
+      if(r.ok){const j=await r.json();if(j.url)return j}}catch(e){}
+  }
+}
+async function go(){
+  const j=await cur();
+  if(j&&/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(j.url)){
+    try{await fetch(j.url+"/tracks.json",{mode:"no-cors",cache:"no-store"});location.replace(j.url+"/"+location.hash);return}catch(e){}
+  }
+  s.innerHTML="<i></i>server offline, retrying…";setTimeout(go,15000);
+}
+go();
+</script>
+</body>
+</html>
