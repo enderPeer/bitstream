@@ -31,7 +31,8 @@ async function cur(){
 async function go(){
   const j=await cur();
   if(j&&/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(j.url)){
-    try{await fetch(j.url+"/tracks.json",{mode:"no-cors",cache:"no-store"});location.replace(j.url+"/"+location.hash);return}catch(e){}
+    /* a dead tunnel still resolves and answers 530 from Cloudflare, so require a real 200 from our server */
+    try{if((await fetch(j.url+"/tracks.json",{method:"HEAD",cache:"no-store"})).ok){location.replace(j.url+"/"+location.hash);return}}catch(e){}
   }
   s.innerHTML="<i></i>server offline, retrying…";setTimeout(go,15000);
 }
